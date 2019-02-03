@@ -3,6 +3,17 @@ from ipaddress import ip_network
 
 from ipify import get_ip
 
+from troposphere import (
+    Base64,
+    ec2,
+    GetAtt,
+    Join,
+    Output,
+    Parameter,
+    Ref,
+    Template,
+)
+
 from troposphere.iam import (
     InstanceProfile,
     PolicyType as IAMPolicy,
@@ -19,20 +30,9 @@ from awacs.aws import (
 
 from awacs.sts import AssumeRole
 
-
-from troposphere import (
-    Base64,
-    ec2,
-    GetAtt,
-    Join,
-    Output,
-    Parameter,
-    Ref,
-    Template,
-)
-
 ApplicationName = "jenkins"
 ApplicationPort = "8080"
+
 GithubAccount = "EffectiveDevOpsWithAWS"
 GithubAnsibleURL = "https://github.com/{}/ansible".format(GithubAccount)
 
@@ -74,6 +74,14 @@ t.add_resource(ec2.SecurityGroup(
     ],
 ))
 
+ud = Base64(Join('\n', [
+    "#!/bin/bash",
+    "yum install --enablerepo=epel -y git",
+    "pip install ansible",
+    AnsiblePullCmd,
+    "echo '*/10 * * * * {}' > /etc/cron.d/ansible-pull".format(AnsiblePullCmd)
+]))
+
 t.add_resource(Role(
     "Role",
     AssumeRolePolicyDocument=Policy(
@@ -84,7 +92,7 @@ t.add_resource(Role(
                 Principal=Principal("Service", ["ec2.amazonaws.com"])
             )
         ]
-    )   
+    )
 ))
 
 t.add_resource(InstanceProfile(
@@ -93,17 +101,9 @@ t.add_resource(InstanceProfile(
     Roles=[Ref("Role")]
 ))
 
-ud = Base64(Join('\n', [
-    "#!/bin/bash",
-    "yum install --enablerepo=epel -y git",
-    "pip install ansible",
-    AnsiblePullCmd,
-    "echo '*/10 * * * * {}' > /etc/cron.d/ansible-pull".format(AnsiblePullCmd)
-]))
-
 t.add_resource(ec2.Instance(
     "instance",
-    ImageId="ami-0cd3dfa4e37921605",
+    ImageId="ami-a4c7edb2",
     InstanceType="t2.micro",
     SecurityGroups=[Ref("SecurityGroup")],
     KeyName=Ref("KeyPair"),
