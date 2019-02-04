@@ -21,6 +21,6 @@
 
 - name: Start Jenkins
   service:
-    name: jenkins-2.163
+    name: jenkins-2.162
     enabled: yes
     state: started    
