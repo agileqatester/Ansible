@@ -9,7 +9,8 @@
   yum_repository:
     name: jenkins
     description: jenkins repository
-    baseurl: http://pkg.jenkins.io/redhat
+    url: http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo
+    dest: /etc/yum.repos.d/jenkins.repo
     enabled: no
     gpgcheck: yes    
 
@@ -20,7 +21,11 @@
     state: present    
 
 - name: Start Jenkins
-  service:
-    name: jenkins-2.162
-    enabled: yes
+  systemd:
+    name: jenkins
+    enabled: true
     state: started    
+
+- name: Sleep for 30 seconds and continue with play
+    wait_for: timeout=30
+    
