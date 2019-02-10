@@ -7,7 +7,7 @@
 
 - name: Download jenkins.repo
   get_url:
-    url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    url: http://pkg.jenkins-ci.org/redhat-stable/jenkins-2.138.2-1.1.noarch.rpm
     dest: /etc/yum.repos.d/jenkins.repo   
 
 - name: Install Jenkins
